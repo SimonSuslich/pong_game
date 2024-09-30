@@ -139,10 +139,12 @@ class PongGame < Gosu::Window
         @ball.update
         @bar1.update
         @bar2.update
+    
+        ballPosition = @ball.getPosition
+        bar1Positon = @bar1.getPosition
+        bar2Position= @bar2.getPosition
 
-        @ball.getPosition
-        @bar1.getPosition
-        @bar2.getPosition
+        
 
         if Gosu.button_down? Gosu::KB_UP
             @bar2.moveUp
