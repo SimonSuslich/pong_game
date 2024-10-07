@@ -5,8 +5,8 @@ class Player
         @score = 0
     end
 
-    def createBar(x, y, bool)
-        PongBar.new(x, y, bool)
+    def createBar(x, y)
+        PongBar.new(x, y)
     end
 
     def update
@@ -51,6 +51,10 @@ class PongBall < Player
         @image.draw(@xCord, @yCord)
     end
 
+    def ballHitBar
+        @xDir *= -1
+    end
+
     def ballHitWall (playerOneWinBool)
         if !playerOneWinBool
             
@@ -62,26 +66,24 @@ class PongBall < Player
 
     def getPosition
         {
-            "top" => @top,
-            "bottom" => @bottom,
-            "left" => @left,
-            "right" => @right
+            :top => @top,
+            :bottom => @bottom,
+            :left => @left,
+            :right => @right
         }
     end
 end
 
 class PongBar
     
-    def initialize(xCordinate, yCordinate, isPlayerOne)
+    def initialize(xCordinate, yCordinate)
         @image = Gosu::Image.new("./media/pongbar.png")
         @xCord = xCordinate
         @yCord = yCordinate
         @top = @yCord
         @bottom = @yCord + 64
-        @side = @xCord
-        if isPlayerOne
-            @side += 8
-        end
+        @left = @xCord
+        @right = @left + 8
     end
 
     def moveUp
@@ -99,9 +101,10 @@ class PongBar
 
     def getPosition
         {
-            "top" => @top,
-            "bottom" => @bottom,
-            "side" => @side
+            :top => @top,
+            :bottom => @bottom,
+            :left => @left,
+            :right => @right
         }
     end
 
@@ -129,9 +132,10 @@ class PongGame < Gosu::Window
         @ball = PongBall.new
         @player1 = Player.new
         @player2 = Player.new
-        @bar1 = @player1.createBar(xCord1, yCord, true)
-        @bar2 = @player2.createBar(xCord2, yCord, false)
+        @bar1 = @player1.createBar(xCord1, yCord)
+        @bar2 = @player2.createBar(xCord2, yCord)
         @background = Gosu::Image.new("./media/pongbackground.png")
+        @counter = 0
     end
 
 
@@ -141,10 +145,24 @@ class PongGame < Gosu::Window
         @bar2.update
     
         ballPosition = @ball.getPosition
-        bar1Positon = @bar1.getPosition
+        bar1Position = @bar1.getPosition
         bar2Position= @bar2.getPosition
 
-        
+        if ballPosition[:top] >= bar2Position[:top] && ballPosition[:bottom] <= bar2Position[:bottom]
+            p "ball between top and bottom"
+            if ballPosition[:right] >= bar2Position[:left]
+                p "ball not to the right"
+                p  ballPosition
+                p bar2Position
+                if ballPosition[:left] <= bar2Position[:right]
+                    p "ball touches bar"
+                    @ball.ballHitBar
+                end
+            end
+
+        end
+
+
 
         if Gosu.button_down? Gosu::KB_UP
             @bar2.moveUp
